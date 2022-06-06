@@ -1,0 +1,10 @@
+---
+services:
+  postgres:
+    image: postgres
+    shm_size: 2gb
+    environment:
+      POSTGRES_USER: ${USER}
+      POSTGRES_PASSWORD: password
+    ports:
+      - ${PGPORT:-5432}:5432
