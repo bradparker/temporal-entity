@@ -1,0 +1,9 @@
+---
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${USER}
+      POSTGRES_PASSWORD: password
+    ports:
+      - ${PGPORT:-5432}:5432
