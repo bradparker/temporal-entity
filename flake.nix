@@ -13,7 +13,7 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {system = system;};
       gems = pkgs.bundlerEnv {
-        name = "temporal-entity-env";
+        name = "temporal-entity-env-1";
         gemdir = ./.;
       };
     in {
@@ -21,7 +21,8 @@
         buildInputs = [
           gems
           gems.ruby
-          pkgs.postgresql
+           pkgs.postgresql
+           pkgs.mysql
         ];
       };
     });

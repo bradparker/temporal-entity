@@ -25,21 +25,21 @@ module TemporalEntity
             belongs_to :entity, class_name: definition.source_class.name
 
             scope :at_time, -> (time) do
-              sub = reselect("max(\"sub\".\"valid_at\")")
-                .from("\"#{self.table_name}\" sub")
-                .where("\"sub\".\"entity_id\" = \"#{self.table_name}\".\"entity_id\"")
-                .where("\"sub\".\"valid_at\" <= ?", time)
+              sub = reselect("max(`sub`.`valid_at`)")
+                .from("`#{self.table_name}` sub")
+                .where("`sub`.`entity_id` = `#{self.table_name}`.`entity_id`")
+                .where("`sub`.`valid_at` <= ?", time)
 
-              where("\"#{self.table_name}\".valid_at = (#{sub.to_sql})")
+              where("`#{self.table_name}`.`valid_at` = (#{sub.to_sql})")
             end
 
             scope :matching_time, -> do
-              sub = reselect("max(\"sub\".\"valid_at\")")
-                .from("\"#{self.table_name}\" sub")
-                .where("\"sub\".\"entity_id\" = \"#{self.table_name}\".entity_id")
-                .where("\"sub\".\"valid_at\" <= \"#{definition.source_class.table_name}\".\"current_time\"")
+              sub = reselect("max(`sub`.`valid_at`)")
+                .from("`#{self.table_name}` sub")
+                .where("`sub`.`entity_id` = `#{self.table_name}`.`entity_id`")
+                .where("`sub`.`valid_at` <= `#{definition.source_class.table_name}`.`current_time`")
 
-              where("\"#{self.table_name}\".\"valid_at\" = (#{sub.to_sql})")
+              where("`#{self.table_name}`.`valid_at` = (#{sub.to_sql})")
             end
           })
 
@@ -51,7 +51,7 @@ module TemporalEntity
           )
 
           scope :"with_#{definition.name}", -> do
-            select("\"#{definition.table_name}\".\"value\" as #{definition.name}")
+            select("`#{definition.table_name}`.`value` AS #{definition.name}")
               .joins(definition.temporal_association_name)
               .merge(const_get(definition.model_name).matching_time)
           end
@@ -120,32 +120,32 @@ module TemporalEntity
 
             scope :at_time, -> (time) do
               sub = reselect("max(sub.valid_at)")
-                .from("\"#{self.table_name}\" sub")
-                .where("\"sub\".\"left_id\" = \"#{self.table_name}\".\"left_id\"")
-                .where("\"sub\".\"right_id\" = \"#{self.table_name}\".\"right_id\"")
-                .where("\"sub\".\"valid_at\" <= ?", time)
+                .from("`#{self.table_name}` sub")
+                .where("`sub`.`left_id` = `#{self.table_name}`.`left_id`")
+                .where("`sub`.`right_id` = `#{self.table_name}`.`right_id`")
+                .where("`sub`.`valid_at` <= ?", time)
 
-              where("\"#{self.table_name}\".\"valid_at\" = (#{sub.to_sql})")
+              where("`#{self.table_name}`.`valid_at` = (#{sub.to_sql})")
             end
 
             scope :matching_time, -> (joined_table_name) do
-              sub = reselect("max(\"sub\".\"valid_at\")")
-                .from("\"#{self.table_name}\" sub")
-                .where("\"sub\".\"valid_at\" <= \"#{joined_table_name}\".\"current_time\"")
+              sub = reselect("max(`sub`.`valid_at`)")
+                .from("`#{self.table_name}` sub")
+                .where("`sub`.`valid_at` <= `#{joined_table_name}`.`current_time`")
 
               if definition.source.unique?
                 sub = sub
-                  .where("\"sub\".\"#{definition.source_side}_id\" = \"#{self.table_name}\".\"#{definition.source_side}_id\"")
+                  .where("`sub`.`#{definition.source_side}_id` = `#{self.table_name}`.`#{definition.source_side}_id`")
               elsif definition.target.unique?
                 sub = sub
-                  .where("\"sub\".\"#{definition.target_side}_id\" = \"#{self.table_name}\".\"#{definition.target_side}_id\"")
+                  .where("`sub`.`#{definition.target_side}_id` = `#{self.table_name}`.`#{definition.target_side}_id`")
               else
                 sub = sub
-                  .where("\"sub\".\"left_id\" = \"#{self.table_name}\".\"left_id\"")
-                  .where("\"sub\".\"right_id\" = \"#{self.table_name}\".\"right_id\"")
+                  .where("`sub`.`left_id` = `#{self.table_name}`.`left_id`")
+                  .where("`sub`.`right_id` = `#{self.table_name}`.`right_id`")
               end
 
-              where("\"#{self.table_name}\".\"valid_at\" = (#{sub.to_sql})")
+              where("`#{self.table_name}`.`valid_at` = (#{sub.to_sql})")
             end
           })
 
@@ -167,8 +167,8 @@ module TemporalEntity
               definition.name.to_sym,
               -> () {
                 select(
-                  "\"#{const_get(definition.target.target_class_name).table_name}\".*",
-                  "\"#{definition.source.source_class.table_name}\".\"current_time\" as current_time",
+                  "`#{const_get(definition.target.target_class_name).table_name}`.*",
+                  "`#{definition.source.source_class.table_name}`.`current_time` AS current_time",
                 )
               },
               through: definition.current_join_association_name,
@@ -186,8 +186,8 @@ module TemporalEntity
               definition.name.to_sym,
               -> () {
                 select(
-                  "\"#{const_get(definition.target.target_class_name).table_name}\".*",
-                  "\"#{definition.source.source_class.table_name}\".\"current_time\" as current_time",
+                  "`#{const_get(definition.target.target_class_name).table_name}`.*",
+                  "`#{definition.source.source_class.table_name}`.`current_time` AS current_time",
                 )
               },
               through: definition.current_join_association_name,
@@ -220,9 +220,9 @@ module TemporalEntity
       def current_join_association_name
         @current_join_association_name ||= if target.unique?
           "current_#{table_name.singularize}".to_sym
-       else
-          "current_#{table_name}".to_sym
-       end
+        else
+           "current_#{table_name}".to_sym
+        end
       end
 
       def source_side
@@ -265,17 +265,17 @@ module TemporalEntity
         scope :at_time, -> (time) do
           with_current_time = from(
             select(
-              "\"#{source_class.table_name}\".*",
-              sanitize_sql_array(["?::timestamp as current_time", time]),
+              "`#{source_class.table_name}`.*",
+              sanitize_sql_array(["? AS `current_time`", time]),
             ),
-            "\"#{source_class.table_name}\"",
+            "`#{source_class.table_name}`",
           )
 
           with_attributes = attributes.keys.reduce(with_current_time) do |scope, attribute_name|
             scope.public_send(:"with_#{attribute_name}")
           end
 
-          with_attributes.select("\"#{source_class.table_name}\".*")
+          with_attributes.select("`#{source_class.table_name}`.*")
         end
       end
     end

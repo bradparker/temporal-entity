@@ -63,6 +63,16 @@
     };
     version = "5.15.0";
   };
+  mysql2 = {
+    groups = ["default"];
+    platforms = [];
+    source = {
+      remotes = ["https://rubygems.org"];
+      sha256 = "0xsy70mg4p854jska7ff7cy8fyn9nhlkrmfdvkkfmk8qxairbfq1";
+      type = "gem";
+    };
+    version = "0.5.4";
+  };
   pg = {
     groups = ["default"];
     platforms = [];
